@@ -1,27 +1,17 @@
 import asyncio
 from ollama import AsyncClient
-from pydantic import BaseModel, Field
-from typing import Literal, Union
+from response_models import BattleDecision
 
 
-class MoveAction(BaseModel):
-    action_type: Literal["move"] = "move"
-    move_name: str = Field(description="The name of the move to use")
-
-class SwitchAction(BaseModel):
-    action_type: Literal["switch"] = "switch"
-    pokemon_species: str = Field(description="The species name of the Pokemon to switch to")
-
-class BattleDecision(BaseModel):
-    reasoning: str = Field(description="Brief explanation of why this action was chosen")
-    action: Union[MoveAction, SwitchAction] = Field(
-        description="The action to take - either use a move or switch Pokemon"
-    )
-
-async def choose_action(battle_messages, model: str) -> str:
+async def local_choose_action(battle_messages, model: str) -> str:
     client = AsyncClient()
     response = await client.chat(
         messages=[
+            {
+                'role': 'system',
+                'content': "You're in a Pokemon Battle. At every turn you'll have a list of actions to take. Choose carefully. \n"
+                "If no moves are available, your pokemon was fainted and you need to switch."
+            },
             {
                 'role': 'user',
                 'content': battle_messages,
@@ -42,5 +32,5 @@ if __name__ == "__main__":
     This is a sample text
     """
 
-    result = asyncio.run(choose_action(battle_messages, model))
+    result = asyncio.run(local_choose_action(battle_messages, model))
     print(result)
