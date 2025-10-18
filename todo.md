@@ -9,3 +9,7 @@ add more models
 Store battle data
 Enable verbosity toggles
 Token counting
+
+Try catch for failed actions and logging them
+make concurrent
+Create system prompt
