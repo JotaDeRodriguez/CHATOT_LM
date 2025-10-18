@@ -39,11 +39,11 @@ My Team:"""
 
         # Get AI decision
         ai_decision = await self.ask_ai_model(battle_message)
-        print(f"AI Decision: {ai_decision}")
+        print(f"{self.model}AI Decision: {ai_decision}")
 
         # Send reasoning as a message to the battle room
         if ai_decision.get("reasoning"):
-            await self.ps_client.send_message(ai_decision["reasoning"], battle.battle_tag)
+            await self.ps_client.send_message(message=ai_decision["reasoning"], room=battle.battle_tag)
 
         # Execute the decision
         if ai_decision.get("action"):
@@ -115,11 +115,11 @@ My Team:"""
 
         # Get AI decision
         ai_decision = await self.ask_ai_model(battle_message)
-        print(f"AI Decision: {ai_decision}")
+        print(f"{self.model}AI Decision: {ai_decision}")
 
         # Send reasoning as a message to the battle room
         if ai_decision.get("reasoning"):
-            await self.ps_client.send_message(ai_decision["reasoning"], battle.battle_tag)
+            await self.ps_client.send_message(message=ai_decision["reasoning"], room=battle.battle_tag)
 
         # Execute the decision
         if ai_decision.get("action"):

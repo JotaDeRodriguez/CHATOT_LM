@@ -7,3 +7,5 @@ improve the prompt
 add more models
 
 Store battle data
+Enable verbosity toggles
+Token counting
