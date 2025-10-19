@@ -1,38 +1,28 @@
 import asyncio
 from ollama import AsyncClient
-from response_models import BattleDecision
 
-
-async def local_choose_action(battle_messages, model: str) -> str:
+async def local_choose_action(battle_messages: list, model: str) -> str:
     client = AsyncClient()
     response = await client.chat(
-        messages=[
-            {
-                'role': 'system',
-                'content': "You're in a Pokemon Battle. At every turn you'll have a list of actions to take. Choose carefully. \n"
-                "If no moves are available, your pokemon was fainted and you need to switch."
-                "Things to consider: Speed, the Pokemon that attacks first has an advantage."
-                "Type matchups"
-            },
-            {
-                'role': 'user',
-                'content': battle_messages,
-            }
-        ],
+        messages=battle_messages,
         model=model,
-        format=BattleDecision.model_json_schema(),
+        format={
+            'properties': {
+                'reasoning': {
+                    'description': 'Explanation of why this action was chosen',
+                    'title': 'Reasoning',
+                    'type': 'string'
+                },
+                'action': {
+                    'description': 'The action to take - either use a move name or the name of the Pokemon to switch to',
+                    'title': 'Action',
+                    'type': 'string'
+                }
+            },
+            'required': ['reasoning', 'action'],
+            'title': 'BattleDecision',
+            'type': 'object',
+            'additionalProperties': False
+        },
     )
     return response.message.content
-
-
-if __name__ == "__main__":
-
-    model = "gemma3:4b"
-    battle_messages = """
-    === Battle State (Turn 1) ===
-    {'turn': 1, 'my_active': {'species': 'dugtrio', 'hp': 1.0, 'moves': [{'name': 'earthquake', 'type': 'GROUND (pokemon type) object', 'power': 100}, {'name': 'suckerpunch', 'type': 'DARK (pokemon type) object', 'power': 70}, {'name': 'swordsdance', 'type': 'NORMAL (pokemon type) object', 'power': 0}, {'name': 'stoneedge', 'type': 'ROCK (pokemon type) object', 'power': 100}]}, 'opponent_active': {'species': 'leafeon', 'hp': 1.0}, 'my_team': [{'species': 'dugtrio', 'hp': 1.0}, {'species': 'glimmora', 'hp': 1.0}, {'species': 'smeargle', 'hp': 1.0}, {'species': 'noctowl', 'hp': 1.0}, {'species': 'skuntank', 'hp': 1.0}, {'species': 'klawf', 'hp': 1.0}], 'available_switches': ['glimmora', 'smeargle', 'noctowl', 'skuntank', 'klawf']}    
-    This is a sample text
-    """
-
-    result = asyncio.run(local_choose_action(battle_messages, model))
-    print(result)

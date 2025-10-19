@@ -9,42 +9,74 @@ from utils import create_observation_dictionary, create_team_dictionary, load_ya
 
 init(autoreset=True)
 
-#TODO apply changes of Router player
 class Local_AIPlayer(Player):
-    def __init__ (self, model, account_configuration=None):
-        super().__init__(account_configuration=account_configuration)
+    def __init__ (self, model, verbosity=False, account_configuration=None, team=None, battle_format=None, log_length=25):
+        super().__init__(account_configuration=account_configuration, team=team, battle_format=battle_format)
         self.model = model
+        self.verbosity = verbosity
+        self.log_length = log_length
 
-    async def choose_move(self, battle):
-        # Create YAML-like battle state message
-        battle_message = f"""=== Battle State (Turn {battle.turn}) ===
+    def write_prompt(self, battle: Battle):
+        system_prompt = load_yaml()
+        battle_tag = battle.battle_tag
 
-My Active Pokemon:
-  species: {battle.active_pokemon.species}
-  hp: {battle.active_pokemon.current_hp_fraction:.1%}
-  available_moves:"""
+        # Collect battle log events
+        battle_log = []
+        for turn_num in sorted(battle.observations.keys()):
+            for event in battle.observations[turn_num].events:
+                # Format event as a string (join the split message parts with |)
+                if "html" not in event:
+                    battle_log.append("|".join(event))
 
-        for move in battle.available_moves:
-            battle_message += f"\n    - {move.id}: type={move.type}, power={move.base_power}"
+        # Get last 100 events
+        recent_messages = battle_log[-self.log_length:] if len(battle_log) > self.log_length else battle_log
 
-        battle_message += f"""
+        # Build the prompt
+        prompt_parts = []
 
-Opponent Active Pokemon:
-  species: {battle.opponent_active_pokemon.species}
-  hp: {battle.opponent_active_pokemon.current_hp_fraction:.1%}
+        # Add battle log
+        prompt_parts.append("Battle Log (Recent Events):")
+        for msg in recent_messages:
+            prompt_parts.append(f"  {msg}")
 
-My Team:"""
+        observations = create_observation_dictionary(battle)
+        prompt_parts.append(f"Observations:\n{json.dumps(observations, indent=2)}")
 
-        for pokemon in battle.team.values():
-            battle_message += f"\n  - {pokemon.species}: hp={pokemon.current_hp_fraction:.1%}"
+        team_info = create_team_dictionary(battle)
+        prompt_parts.append(f"Team Status:\n{json.dumps(team_info, indent=2)}")
 
-        battle_message += "\n\nAvailable Switches:"
-        for pokemon in battle.available_switches:
-            battle_message += f"\n  - {pokemon.species}"
+        # Add available actions
+        available_actions = {
+            "moves": [move.id for move in battle.available_moves],
+            "switches": [pokemon.species for pokemon in battle.available_switches]
+        }
+        prompt_parts.append(f"Available Actions:\n{json.dumps(available_actions, indent=2)}")
 
-        # Get AI decision
+        # Combine all parts with clear separation
+        final_prompt = "\n".join(prompt_parts)
+
+        return [
+            {
+                "role": "system",
+                "content": system_prompt["agent"]["system_prompt"]
+            },
+            {
+                "role": "user",
+                "content": final_prompt
+            }
+        ]
+
+
+    async def choose_move(self, battle: Battle):
+
+        battle_message = self.write_prompt(battle=battle)
         ai_decision = await self.ask_ai_model(battle_message)
-        print(f"{self.model}AI Decision: {ai_decision}")
+
+        # TODO Replace for proper logging
+        if self.verbosity:
+            print("-"*30)
+            print(f"{(self.model).split("/")[-1]} Decision: {ai_decision}")
+            print("-"*30)
 
         # Send reasoning as a message to the battle room
         if ai_decision.get("reasoning"):
@@ -56,7 +88,7 @@ My Team:"""
 
         # Execute the decision
         if ai_decision.get("action"):
-            action_name = ai_decision["action"]
+            action_name = ai_decision["action"].lower()
 
             # First try to find it as a move
             for move in battle.available_moves:
@@ -69,6 +101,8 @@ My Team:"""
                     return self.create_order(pokemon)
 
         # Fallback to random if AI decision fails
+        if self.verbosity: 
+            print(Fore.RED +"Error in decision response. Defaulting to a random choice")
         return self.choose_random_move(battle)
     
     async def ask_ai_model(self, battle_message):
@@ -85,11 +119,14 @@ My Team:"""
             return {"reasoning": "Failed to parse response", "action": None}
 
 
+
 class Router_AIPlayer(Player):
-    def __init__ (self, model, verbosity=False, account_configuration=None, team=None, battle_format=None):
+    def __init__ (self, model, verbosity=False, account_configuration=None, team=None, battle_format=None, log_length=100):
         super().__init__(account_configuration=account_configuration, team=team, battle_format=battle_format)
         self.model = model
         self.verbosity = verbosity
+        self.log_length = log_length
+
 
     def write_prompt(self, battle: Battle):
         system_prompt = load_yaml()
@@ -104,7 +141,7 @@ class Router_AIPlayer(Player):
                     battle_log.append("|".join(event))
 
         # Get last 100 events
-        recent_messages = battle_log[-100:] if len(battle_log) > 100 else battle_log
+        recent_messages = battle_log[-self.log_length:] if len(battle_log) > self.log_length else battle_log
 
         # Build the prompt
         prompt_parts = []
