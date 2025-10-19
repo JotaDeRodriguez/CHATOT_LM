@@ -5,7 +5,7 @@ from ollama_chat import local_choose_action
 from open_router_chat import router_choose_action
 from poke_env.battle import Battle
 from colorama import init, Fore
-from utils import create_observation_dictionary, create_team_dictionary, load_yaml
+from utils import create_observation_dictionary, create_team_dictionary, load_yaml, log_battle_interaction
 
 init(autoreset=True)
 
@@ -15,6 +15,8 @@ class Local_AIPlayer(Player):
         self.model = model
         self.verbosity = verbosity
         self.log_length = log_length
+        # Store battle interactions to log when battle finishes
+        self.battle_interactions = {}
 
     def write_prompt(self, battle: Battle):
         system_prompt = load_yaml()
@@ -72,6 +74,19 @@ class Local_AIPlayer(Player):
         battle_message = self.write_prompt(battle=battle)
         ai_decision = await self.ask_ai_model(battle_message)
 
+        # Store interaction to log when battle finishes (will update validity later)
+        if battle.battle_tag not in self.battle_interactions:
+            self.battle_interactions[battle.battle_tag] = []
+
+        # Create interaction entry (will be updated with validity)
+        interaction = {
+            "messages": battle_message,
+            "response": ai_decision,
+            "is_valid_response": False  # Will be updated if action succeeds
+        }
+
+        self.battle_interactions[battle.battle_tag].append(interaction)
+
         # TODO Replace for proper logging
         if self.verbosity:
             print("-"*30)
@@ -93,18 +108,20 @@ class Local_AIPlayer(Player):
             # First try to find it as a move
             for move in battle.available_moves:
                 if move.id == action_name:
+                    interaction["is_valid_response"] = True
                     return self.create_order(move)
 
             # If not a move, try to find it as a pokemon to switch to
             for pokemon in battle.available_switches:
                 if pokemon.species == action_name:
+                    interaction["is_valid_response"] = True
                     return self.create_order(pokemon)
 
         # Fallback to random if AI decision fails
-        if self.verbosity: 
+        if self.verbosity:
             print(Fore.RED +"Error in decision response. Defaulting to a random choice")
         return self.choose_random_move(battle)
-    
+
     async def ask_ai_model(self, battle_message):
         """
         Call Ollama to get AI battle decision
@@ -118,6 +135,25 @@ class Local_AIPlayer(Player):
         except json.JSONDecodeError:
             return {"reasoning": "Failed to parse response", "action": None}
 
+    def _battle_finished_callback(self, battle: Battle):
+        """
+        Called when a battle finishes. Logs all interactions with the outcome.
+        """
+        if battle.battle_tag in self.battle_interactions:
+            outcome = "win" if battle.won else "loss"
+
+            for interaction in self.battle_interactions[battle.battle_tag]:
+                log_battle_interaction(
+                    model_name=self.model,
+                    messages=interaction["messages"],
+                    response=interaction["response"],
+                    outcome=outcome,
+                    is_valid_response=interaction["is_valid_response"]
+                )
+
+            # Clean up stored interactions for this battle
+            del self.battle_interactions[battle.battle_tag]
+
 
 
 class Router_AIPlayer(Player):
@@ -126,6 +162,8 @@ class Router_AIPlayer(Player):
         self.model = model
         self.verbosity = verbosity
         self.log_length = log_length
+        # Store battle interactions to log when battle finishes
+        self.battle_interactions = {}
 
 
     def write_prompt(self, battle: Battle):
@@ -184,6 +222,19 @@ class Router_AIPlayer(Player):
         battle_message = self.write_prompt(battle=battle)
         ai_decision = await self.ask_ai_model(battle_message)
 
+        # Store interaction to log when battle finishes (will update validity later)
+        if battle.battle_tag not in self.battle_interactions:
+            self.battle_interactions[battle.battle_tag] = []
+
+        # Create interaction entry (will be updated with validity)
+        interaction = {
+            "messages": battle_message,
+            "response": ai_decision,
+            "is_valid_response": False  # Will be updated if action succeeds
+        }
+
+        self.battle_interactions[battle.battle_tag].append(interaction)
+
         # TODO Replace for proper logging
         if self.verbosity:
             print("-"*30)
@@ -205,28 +256,57 @@ class Router_AIPlayer(Player):
             # First try to find it as a move
             for move in battle.available_moves:
                 if move.id == action_name:
+                    interaction["is_valid_response"] = True
                     return self.create_order(move)
 
             # If not a move, try to find it as a pokemon to switch to
             for pokemon in battle.available_switches:
                 if pokemon.species == action_name:
+                    interaction["is_valid_response"] = True
                     return self.create_order(pokemon)
 
         # Fallback to random if AI decision fails
-        if self.verbosity: 
+        if self.verbosity:
             print(Fore.RED +"Error in decision response. Defaulting to a random choice")
         return self.choose_random_move(battle)
-    
+
     async def ask_ai_model(self, battle_message):
         """
         Call OpenRouter to get AI battle decision
         """
-        # Await the async function
-        response = await router_choose_action(battle_message, self.model)
-
         try:
-            decision = json.loads(response)
-            return decision
-        except json.JSONDecodeError:
-            return {"reasoning": "Failed to parse response", "action": None}
+            # Await the async function
+            response = await router_choose_action(battle_message, self.model)
+
+            try:
+                decision = json.loads(response)
+                return decision
+            except json.JSONDecodeError as e:
+                if self.verbosity:
+                    print(Fore.RED + f"Failed to parse AI response as JSON: {str(e)}")
+                return {"reasoning": "Failed to parse response", "action": None}
+
+        except Exception as e:
+            if self.verbosity:
+                print(Fore.RED + f"Error calling AI model: {str(e)}")
+            return {"reasoning": f"API error: {str(e)}", "action": None}
+
+    def _battle_finished_callback(self, battle: Battle):
+        """
+        Called when a battle finishes. Logs all interactions with the outcome.
+        """
+        if battle.battle_tag in self.battle_interactions:
+            outcome = "win" if battle.won else "loss"
+
+            for interaction in self.battle_interactions[battle.battle_tag]:
+                log_battle_interaction(
+                    model_name=self.model,
+                    messages=interaction["messages"],
+                    response=interaction["response"],
+                    outcome=outcome,
+                    is_valid_response=interaction["is_valid_response"]
+                )
+
+            # Clean up stored interactions for this battle
+            del self.battle_interactions[battle.battle_tag]
 

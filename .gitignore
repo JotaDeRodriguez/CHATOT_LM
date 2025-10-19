@@ -12,3 +12,4 @@ wheels/
 .env
 
 .claude/*
+battle_logs/*
