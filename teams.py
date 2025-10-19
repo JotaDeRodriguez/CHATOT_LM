@@ -28,7 +28,17 @@ Timid Nature
 - Calm Mind
 """
 
-metagross = """Latias (F) @ Soul Dew
+metagross = """
+Metagross @ Leftovers
+Ability: Clear Body
+EVs: 252 HP / 180 Atk / 20 Def / 56 SpD
+Brave Nature
+- Meteor Mash
+- Explosion
+- Hidden Power [Fire]
+- Pursuit
+
+Latias (F) @ Soul Dew
 Ability: Levitate
 EVs: 112 HP / 252 SpA / 144 Spe
 Timid Nature
@@ -45,12 +55,4 @@ Hasty Nature
 - Thunderbolt
 - Calm Mind
 - Self-Destruct
-
-Metagross @ Leftovers
-Ability: Clear Body
-EVs: 252 HP / 180 Atk / 20 Def / 56 SpD
-Brave Nature
-- Meteor Mash
-- Explosion
-- Hidden Power [Fire]
-- Pursuit"""
+"""
