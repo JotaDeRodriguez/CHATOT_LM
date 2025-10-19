@@ -54,14 +54,3 @@ async def router_choose_action(battle_messages: list, model: str) -> str:
 
     return data["choices"][0]["message"]["content"]
 
-
-if __name__ == "__main__":
-    model = "google/gemini-2.5-flash"
-    battle_messages = """
-    === Battle State (Turn 1) ===
-    {'turn': 1, 'my_active': {'species': 'dugtrio', 'hp': 1.0, 'moves': [{'name': 'earthquake', 'type': 'GROUND (pokemon type) object', 'power': 100}, {'name': 'suckerpunch', 'type': 'DARK (pokemon type) object', 'power': 70}, {'name': 'swordsdance', 'type': 'NORMAL (pokemon type) object', 'power': 0}, {'name': 'stoneedge', 'type': 'ROCK (pokemon type) object', 'power': 100}]}, 'opponent_active': {'species': 'leafeon', 'hp': 1.0}, 'my_team': [{'species': 'dugtrio', 'hp': 1.0}, {'species': 'glimmora', 'hp': 1.0}, {'species': 'smeargle', 'hp': 1.0}, {'species': 'noctowl', 'hp': 1.0}, {'species': 'skuntank', 'hp': 1.0}, {'species': 'klawf', 'hp': 1.0}], 'available_switches': ['glimmora', 'smeargle', 'noctowl', 'skuntank', 'klawf']}
-    This is a sample text
-    """
-
-    result = asyncio.run(router_choose_action(battle_messages, model))
-    print(result)
