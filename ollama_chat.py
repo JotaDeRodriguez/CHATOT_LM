@@ -11,6 +11,8 @@ async def local_choose_action(battle_messages, model: str) -> str:
                 'role': 'system',
                 'content': "You're in a Pokemon Battle. At every turn you'll have a list of actions to take. Choose carefully. \n"
                 "If no moves are available, your pokemon was fainted and you need to switch."
+                "Things to consider: Speed, the Pokemon that attacks first has an advantage."
+                "Type matchups"
             },
             {
                 'role': 'user',

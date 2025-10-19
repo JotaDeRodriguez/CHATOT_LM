@@ -3,6 +3,9 @@ from poke_env.player import Player
 from ollama_chat import local_choose_action
 from open_router_chat import router_choose_action
 from poke_env.battle import Battle
+from colorama import init, Fore
+
+init(autoreset=True)
 
 #TODO apply changes of Router player
 class Local_AIPlayer(Player):
@@ -51,21 +54,17 @@ My Team:"""
 
         # Execute the decision
         if ai_decision.get("action"):
-            action = ai_decision["action"]
+            action_name = ai_decision["action"]
 
-            if action.get("action_type") == "move":
-                move_name = action.get("move_name")
-                # Find the move in available moves
-                for move in battle.available_moves:
-                    if move.id == move_name:
-                        return self.create_order(move)
+            # First try to find it as a move
+            for move in battle.available_moves:
+                if move.id == action_name:
+                    return self.create_order(move)
 
-            elif action.get("action_type") == "switch":
-                pokemon_species = action.get("pokemon_species")
-                # Find the pokemon to switch to
-                for pokemon in battle.available_switches:
-                    if pokemon.species == pokemon_species:
-                        return self.create_order(pokemon)
+            # If not a move, try to find it as a pokemon to switch to
+            for pokemon in battle.available_switches:
+                if pokemon.species == action_name:
+                    return self.create_order(pokemon)
 
         # Fallback to random if AI decision fails
         return self.choose_random_move(battle)
@@ -93,6 +92,9 @@ class Router_AIPlayer(Player):
 
         battle_message = "\n\n===Recent Battle History ==="
         # Get all battle events from observations
+        #TODO Maybe Cleanup messages
+        #TODO add opposing team observation, status, etc.
+
         all_events = []
         for turn_num in sorted(battle.observations.keys()):
             for event in battle.observations[turn_num].events:
@@ -101,7 +103,7 @@ class Router_AIPlayer(Player):
                     all_events.append("|".join(event))
 
         # Get last n events
-        recent_messages = all_events[-50:] if len(all_events) > 10 else all_events
+        recent_messages = all_events[-100:] if len(all_events) > 100 else all_events
         for msg in recent_messages:
             battle_message += f"\n  {msg}"
 
@@ -114,6 +116,8 @@ available_moves:"""
         if battle.available_moves:
             for move in battle.available_moves:
                 battle_message += f"\n    - {move.id}: type={move.type}, power={move.base_power}"
+        if battle.active_pokemon.status: 
+            battle_message += f"The current status of your pokemon is {battle.active_pokemon.status}"
 
         battle_message += f"""
 Opponent Active Pokemon:
@@ -128,6 +132,9 @@ My Team:"""
         battle_message += "\n\nAvailable Switches:"
         for pokemon in battle.available_switches:
             battle_message += f"\n  - {pokemon.species}"
+
+        battle_message += "\n\nOpponents team: "
+        battle_message += f"{battle.opponent_team}"
 
         ai_decision = await self.ask_ai_model(battle_message)
 
@@ -148,23 +155,21 @@ My Team:"""
 
         # Execute the decision
         if ai_decision.get("action"):
-            action = ai_decision["action"]
+            action_name = ai_decision["action"].lower()
 
-            if action.get("action_type") == "move":
-                move_name = action.get("move_name")
-                # Find the move in available moves
-                for move in battle.available_moves:
-                    if move.id == move_name:
-                        return self.create_order(move)
+            # First try to find it as a move
+            for move in battle.available_moves:
+                if move.id == action_name:
+                    return self.create_order(move)
 
-            elif action.get("action_type") == "switch":
-                pokemon_species = action.get("pokemon_species")
-                # Find the pokemon to switch to
-                for pokemon in battle.available_switches:
-                    if pokemon.species == pokemon_species:
-                        return self.create_order(pokemon)
+            # If not a move, try to find it as a pokemon to switch to
+            for pokemon in battle.available_switches:
+                if pokemon.species == action_name:
+                    return self.create_order(pokemon)
 
         # Fallback to random if AI decision fails
+        if self.verbosity: 
+            print(Fore.RED +"Error in decision response. Defaulting to a random choice")
         return self.choose_random_move(battle)
     
     async def ask_ai_model(self, battle_message):

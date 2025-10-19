@@ -1,7 +1,7 @@
 ### TODOs
 
 Give variables more consistent names
-Integrate battle history into the prompt
+Integrate battle history into the prompt - DONE
 integrate full team data and observations into prompt
 improve the prompt
 add more models
@@ -13,3 +13,5 @@ Token counting
 Try catch for failed actions and logging them
 make concurrent
 Create system prompt
+
+Try double battles
