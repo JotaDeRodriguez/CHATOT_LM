@@ -18,7 +18,7 @@ LLM-based Pokemon Showdown bot using Poke-Env. Supports local models via Ollama 
 ## Installation
 
 ```bash
-git clone <https://github.com/JotaDeRodriguez/CHATOT_LMl>
+git clone https://github.com/JotaDeRodriguez/CHATOT_LM
 cd CHATOT_LM
 uv sync
 ```
