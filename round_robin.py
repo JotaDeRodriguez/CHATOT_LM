@@ -3,9 +3,8 @@ from main import *
 from tabulate import tabulate
 
 
-players = [qwen_3_32b_player,
+players = [qwen_player,
            gpt_5_player,
-           qwen_player,
            gemini_flash_player,
            grok_4_player,
            random_player,
@@ -13,7 +12,7 @@ players = [qwen_3_32b_player,
            max_player]
 
 async def main():
-    cross_evaluation = await cross_evaluate(players, n_challenges=1)
+    cross_evaluation = await cross_evaluate(players, n_challenges=3)
     table = [["-"] + [p.username for p in players]]
     for p_1, results in cross_evaluation.items():
         row = [p_1]

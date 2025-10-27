@@ -63,20 +63,43 @@ uv run python round_robin.py
 
 ## Configuration
 
+**Creating players:**
+
+Use factory methods to create AI players:
+
+```python
+from ai_players import AIPlayer
+from poke_env import AccountConfiguration
+
+# Local Ollama models
+local_player = AIPlayer.local(
+    model="gemma3:12b",
+    verbosity=True,
+    account_configuration=AccountConfiguration("bot_name", None),
+    battle_format="gen3ubers",
+    log_length=25,  # default: 25 for local
+    team=your_team
+)
+
+# OpenRouter cloud models
+cloud_player = AIPlayer.router(
+    model="anthropic/claude-3-5-sonnet",
+    verbosity=True,
+    account_configuration=AccountConfiguration("bot_name", None),
+    battle_format="gen3ubers",
+    log_length=100,  # default: 100 for router
+    team=your_team
+)
+```
+
 **Change battle format:**
 ```python
-player = Local_AIPlayer(model="gemma3:12b", battle_format="gen9ou", team=your_team)
+player = AIPlayer.local(model="gemma3:12b", battle_format="gen9ou", team=your_team)
 ```
 
 **Adjust log length:**
 ```python
-player = Local_AIPlayer(model="gemma3:12b", log_length=50)  # default: 25
-```
-
-**Use different models:**
-```python
-local_player = Local_AIPlayer(model="mistral:7b", ...)
-cloud_player = Router_AIPlayer(model="anthropic/claude-3-5-sonnet", ...)
+player = AIPlayer.local(model="gemma3:12b", log_length=50)
 ```
 
 ## Troubleshooting

@@ -1,6 +1,6 @@
 import asyncio
 import random
-from ai_players import Local_AIPlayer, Router_AIPlayer
+from ai_players import AIPlayer
 from poke_env import AccountConfiguration
 from poke_env.player import RandomPlayer, SimpleHeuristicsPlayer, MaxBasePowerPlayer
 from teams import *
@@ -41,45 +41,44 @@ print()
 
 ### LOCAL AI ###
 
-gemma_player = Local_AIPlayer(model="gemma3:12b", verbosity=True,
-                                      account_configuration=AccountConfiguration("gemma3_12b", None),
-                                      battle_format="gen3ubers",
-                                      log_length=25,
-                                      team=team_assignments['gemma'])
+gemma_player = AIPlayer.local(model="gemma3:12b", verbosity=True,
+                              account_configuration=AccountConfiguration("gemma3_12b", None),
+                              battle_format="gen3ubers",
+                              team=team_assignments['gemma'])
 
-qwen_player = Local_AIPlayer(model="qwen3:14b", verbosity=True,
-                                      account_configuration=AccountConfiguration("qwen3_14b", None),
-                                      battle_format="gen3ubers",
-                                      team=team_assignments['qwen'])
+qwen_player = AIPlayer.local(model="qwen3:14b", verbosity=True,
+                             account_configuration=AccountConfiguration("qwen3_14b", None),
+                             battle_format="gen3ubers",
+                             team=team_assignments['qwen'])
 
 
 ### OPEN ROUTER ###
 
-gemini_flash_player = Router_AIPlayer(model="google/gemini-2.5-flash", 
+gemini_flash_player = AIPlayer.router(model="google/gemini-2.5-flash",
                                       verbosity=True,
                                       account_configuration=AccountConfiguration("Gemini_Flash", None),
                                       battle_format="gen3ubers",
                                       team=team_assignments['gemini'])
 
-gpt_5_player = Router_AIPlayer(model="openai/gpt-5-mini",  
+gpt_5_player = AIPlayer.router(model="openai/gpt-5-nano",
                                verbosity=True,
-                                account_configuration=AccountConfiguration("gpt_5", None), 
-                                battle_format="gen3ubers",
-                                team=team_assignments['gpt5'])
+                               account_configuration=AccountConfiguration("gpt_5", None),
+                               battle_format="gen3ubers",
+                               team=team_assignments['gpt5'])
 
-gpt_oss_player = Router_AIPlayer(model="openai/gpt-oss-120b",  
-                                verbosity=True,
-                                account_configuration=AccountConfiguration("gpt_oss", None),
-                                battle_format="gen3ubers",
-                                team=team_assignments['gpt_oss'])
+gpt_oss_player = AIPlayer.router(model="openai/gpt-oss-120b",
+                                 verbosity=True,
+                                 account_configuration=AccountConfiguration("gpt_oss", None),
+                                 battle_format="gen3ubers",
+                                 team=team_assignments['gpt_oss'])
 
-qwen_3_32b_player = Router_AIPlayer(model="qwen/qwen3-32b",  
-                                verbosity=True,
-                                account_configuration=AccountConfiguration("qwen_3_32_b", None),
-                                battle_format="gen3ubers",
-                                team=team_assignments['qwen_32b'])
+qwen_3_32b_player = AIPlayer.router(model="qwen/qwen3-32b",
+                                    verbosity=True,
+                                    account_configuration=AccountConfiguration("qwen_3_32_b", None),
+                                    battle_format="gen3ubers",
+                                    team=team_assignments['qwen_32b'])
 
-grok_4_player = Router_AIPlayer(model="x-ai/grok-4-fast",  
+grok_4_player = AIPlayer.router(model="x-ai/grok-4-fast",
                                 verbosity=True,
                                 account_configuration=AccountConfiguration("grok_4_fast", None),
                                 battle_format="gen3ubers",
@@ -88,17 +87,20 @@ grok_4_player = Router_AIPlayer(model="x-ai/grok-4-fast",
 
 ### DEFAULTS ###
 
-random_player = RandomPlayer(account_configuration=AccountConfiguration("random_player", None), 
-                            battle_format="gen3ubers", 
-                            team=team_assignments['random'])
+random_player = RandomPlayer(account_configuration=AccountConfiguration("random_player", None),
+                            battle_format="gen3ubers",
+                            team=team_assignments['random'],
+                            max_concurrent_battles=0) # Unlimited concurrency
 
-simple_player = SimpleHeuristicsPlayer(account_configuration=AccountConfiguration("simple_player", None), 
-                                      battle_format="gen3ubers", 
-                                      team=team_assignments['simple'])
+simple_player = SimpleHeuristicsPlayer(account_configuration=AccountConfiguration("simple_player", None),
+                                      battle_format="gen3ubers",
+                                      team=team_assignments['simple'],
+                                      max_concurrent_battles=0)
 
-max_player = MaxBasePowerPlayer(account_configuration=AccountConfiguration("max_damage_player", None), 
-                               battle_format="gen3ubers", 
-                               team=team_assignments['max'])
+max_player = MaxBasePowerPlayer(account_configuration=AccountConfiguration("max_damage_player", None),
+                               battle_format="gen3ubers",
+                               team=team_assignments['max'],
+                               max_concurrent_battles=0)
 
 async def main():
     # await gemma_player.accept_challenges(opponent=None, n_challenges=1)
