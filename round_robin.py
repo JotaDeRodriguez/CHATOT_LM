@@ -1,28 +1,77 @@
-from poke_env import cross_evaluate
-from main import *
-from tabulate import tabulate
+from random_team_builder import RandomTeamBuilder
+from tournament import cross_evaluate_with_random_teams, print_results
+import asyncio
 
 
-players = [qwen_player,
-           gpt_5_player,
-           gemini_flash_player,
-           grok_4_player,
-           random_player,
-           simple_player,
-           max_player]
+# Model configurations - easy to add/remove models
+MODEL_CONFIGS = [
+    # {
+    #     "type": "local",
+    #     "model": "qwen3:14b",
+    #     "username": "qwen3_14b",
+    #     "verbosity": True
+    # },
+    # {
+    #     "type": "router",
+    #     "model": "openai/gpt-5-nano",
+    #     "username": "gpt_5",
+    #     "verbosity": True
+    # },
+    {
+        "type": "router",
+        "model": "google/gemini-2.5-flash",
+        "username": "Gemini_Flash",
+        "verbosity": True
+    },
+    {
+        "type": "router",
+        "model": "x-ai/grok-4-fast",
+        "username": "grok4_fast",
+        "verbosity": True
+    },
+    {
+        "type": "router",
+        "model": "deepseek/deepseek-v3.2-exp",
+        "username": "deepseek",
+        "verbosity": True
+    },
+    {
+        "type": "simple",
+        "username": "simple_player"
+    },
+    # {
+    #     "type": "max",
+    #     "username": "max_damage_player"
+    # }
+]
+
+# Tournament configuration variables
+BUILDS_FILE = "pokemon_builds.txt"
+FILTER_FORMAT = "doubles"
+TEAM_SIZE = 4
+N_CHALLENGES = 5
+BATTLE_FORMAT = "gen3ubers"
+
 
 async def main():
-    cross_evaluation = await cross_evaluate(players, n_challenges=3)
-    table = [["-"] + [p.username for p in players]]
-    for p_1, results in cross_evaluation.items():
-        row = [p_1]
-        for p_2 in results:
-            win_rate = cross_evaluation[p_1][p_2]
-            # Display "-" for self-play (diagonal entries)
-            row.append("-" if win_rate is None else f"{win_rate:.2f}")
-        table.append(row)
+    # Initialize team builder
+    print("Initializing Random Team Builder...")
+    team_builder = RandomTeamBuilder(
+        builds_file=BUILDS_FILE,
+        filter_format=FILTER_FORMAT,
+    )
 
-    print(tabulate(table))
+    # Run cross-evaluation with random teams for each match
+    cross_evaluation = await cross_evaluate_with_random_teams(
+        player_configs=MODEL_CONFIGS,
+        team_builder=team_builder,
+        n_challenges=N_CHALLENGES,
+        battle_format=BATTLE_FORMAT,
+        team_size=TEAM_SIZE
+    )
+
+    # Print results
+    print_results(cross_evaluation, MODEL_CONFIGS, N_CHALLENGES)
 
 
 if __name__ == "__main__":

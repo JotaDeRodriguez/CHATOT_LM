@@ -10,17 +10,18 @@ from utils import create_observation_dictionary, create_team_dictionary, load_ya
 init(autoreset=True)
 
 class AIPlayer(Player):
-    def __init__ (self, model, provider, verbosity=False, account_configuration=None, team=None, battle_format=None, log_length=25, max_concurrent_battles=0):
+    def __init__ (self, model, provider, verbosity=False, account_configuration=None, team=None, battle_format=None, log_length=25, max_concurrent_battles=0, max_turns=25):
         super().__init__(account_configuration=account_configuration, team=team, battle_format=battle_format, max_concurrent_battles=max_concurrent_battles)
         self.model = model
         self._provider = provider  # 'local' or 'router'
         self.verbosity = verbosity
         self.log_length = log_length
+        self.max_turns = max_turns
         # Store battle interactions to log when battle finishes
         self.battle_interactions = {}
 
     @classmethod
-    def local(cls, model, verbosity=False, account_configuration=None, team=None, battle_format=None, log_length=None, max_concurrent_battles=0):
+    def local(cls, model, verbosity=False, account_configuration=None, team=None, battle_format=None, log_length=None, max_concurrent_battles=0, max_turns=25):
         """Create an AIPlayer that uses local Ollama models"""
         return cls(
             model=model,
@@ -30,11 +31,12 @@ class AIPlayer(Player):
             team=team,
             battle_format=battle_format,
             log_length=log_length if log_length is not None else 25,
-            max_concurrent_battles=max_concurrent_battles
+            max_concurrent_battles=max_concurrent_battles,
+            max_turns=max_turns
         )
 
     @classmethod
-    def router(cls, model, verbosity=False, account_configuration=None, team=None, battle_format=None, log_length=None, max_concurrent_battles=0):
+    def router(cls, model, verbosity=False, account_configuration=None, team=None, battle_format=None, log_length=None, max_concurrent_battles=0, max_turns=25):
         """Create an AIPlayer that uses OpenRouter models"""
         return cls(
             model=model,
@@ -44,7 +46,8 @@ class AIPlayer(Player):
             team=team,
             battle_format=battle_format,
             log_length=log_length if log_length is not None else 100,
-            max_concurrent_battles=max_concurrent_battles
+            max_concurrent_battles=max_concurrent_battles,
+            max_turns=max_turns
         )
 
     def write_prompt(self, battle: Battle):
@@ -99,6 +102,16 @@ class AIPlayer(Player):
 
 
     async def choose_move(self, battle: Battle):
+        # Check if turn limit exceeded
+        if battle.turn > self.max_turns:
+            if self.verbosity:
+                print(Fore.YELLOW + f"Turn limit ({self.max_turns}) exceeded. Forfeiting battle.")
+            try:
+                await self.ps_client.send_message(message="/forfeit", room=battle.battle_tag)
+            except Exception:
+                pass
+            # Return a random move as fallback (forfeit command should end the battle)
+            return self.choose_random_move(battle)
 
         battle_message = self.write_prompt(battle=battle)
         ai_decision = await self.ask_ai_model(battle_message)
