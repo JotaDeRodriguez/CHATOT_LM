@@ -17,6 +17,11 @@ async def local_choose_action(battle_messages: list, model: str) -> str:
                     'description': 'The action to take - either use a move name or the name of the Pokemon to switch to',
                     'title': 'Action',
                     'type': 'string'
+                },
+                'scratchpad': {
+                    'description': 'Private notes and strategic considerations for future turns. This content will be provided back in subsequent turns.',
+                    'title': 'Scratchpad',
+                    'type': 'string'
                 }
             },
             'required': ['reasoning', 'action'],

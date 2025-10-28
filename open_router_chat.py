@@ -25,8 +25,18 @@ async def router_choose_action(battle_messages: list, model: str) -> str:
                         "schema": {
                             "type": "object",
                             "properties": {
-                                "reasoning": {"type": "string"},
-                                "action": {"type": "string"}
+                                "reasoning": {
+                                    "type": "string",
+                                    "description": "Explanation of why this action was chosen"
+                                },
+                                "action": {
+                                    "type": "string",
+                                    "description": "The action to take - either use a move name or the name of the Pokemon to switch to"
+                                },
+                                "scratchpad": {
+                                    "type": "string",
+                                    "description": "Private notes and strategic considerations for future turns. This content will be provided back in subsequent turns."
+                                }
                             },
                             "required": ["reasoning", "action"],
                             "additionalProperties": False

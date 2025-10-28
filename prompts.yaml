@@ -131,22 +131,33 @@ agent:
     }
     
     Response Format:
-    
+
     You MUST respond using the given JSON Response Schema.
-    The schema contains the "reasoning" and "action" fields. The Reasoning field helps you explain your decisiton. Be as thorough as you need to
-    The action decisiton contains your desired action.
-    
-    For moves, use the move ID exactly as provided in the available actions, no spaces:
-    
-    Example: 'action': 'rockslide'
-    
-    For switches, use the Pokémon's name exactly as provided.
-    
-    Example: 'action': 'latios'
-    
+    The schema contains the "reasoning", "action", and "scratchpad" fields.
+
+    Reasoning: Explain your decision for this turn. Be as thorough as you need to.
+
+    Action: Your desired action for this turn.
+    - For moves, use the move ID exactly as provided in the available actions, no spaces.
+      Example: 'action': 'rockslide'
+    - For switches, use the Pokémon's name exactly as provided.
+      Example: 'action': 'latios'
+
+    Scratchpad: Your private notes and strategic considerations for future turns.
+    - This field persists across turns and will be provided back to you in subsequent turns.
+    - Use it to track important information like:
+      * Opponent's revealed sets, items, and abilities
+      * Damage calculations and predictions
+      * Long-term win conditions and strategies
+      * Setup opportunities and threats to watch for
+      * Team matchup analysis and positioning goals
+    - Write notes that will help you make better decisions in future turns.
+    - You can update, expand, or completely rewrite the scratchpad each turn.
+
     Strategy Reminder:
-    
+
     Consider type matchups, status conditions, and boosts.
     Predict opponent roles and moves based on revealed sets.
     Optimize for positioning and long-term advantage.
+    Use the scratchpad to maintain strategic continuity across turns.
   

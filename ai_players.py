@@ -19,6 +19,8 @@ class AIPlayer(Player):
         self.max_turns = max_turns
         # Store battle interactions to log when battle finishes
         self.battle_interactions = {}
+        # Store scratchpad content per battle for context persistence
+        self.battle_scratchpads = {}
 
     @classmethod
     def local(cls, model, verbosity=False, account_configuration=None, team=None, battle_format=None, log_length=None, max_concurrent_battles=0, max_turns=25):
@@ -86,6 +88,10 @@ class AIPlayer(Player):
         }
         prompt_parts.append(f"Available Actions:\n{json.dumps(available_actions, indent=2)}")
 
+        # Add scratchpad from previous turn if it exists
+        if battle_tag in self.battle_scratchpads:
+            prompt_parts.append(f"Scratchpad (from previous turn):\n{self.battle_scratchpads[battle_tag]}")
+
         # Combine all parts with clear separation
         final_prompt = "\n".join(prompt_parts)
 
@@ -116,6 +122,10 @@ class AIPlayer(Player):
         battle_message = self.write_prompt(battle=battle)
         ai_decision = await self.ask_ai_model(battle_message)
 
+        # Store scratchpad if provided
+        if ai_decision.get("scratchpad"):
+            self.battle_scratchpads[battle.battle_tag] = ai_decision["scratchpad"]
+
         # Store interaction to log when battle finishes
         if battle.battle_tag not in self.battle_interactions:
             self.battle_interactions[battle.battle_tag] = []
@@ -132,8 +142,9 @@ class AIPlayer(Player):
         # TODO Replace for proper logging
         if self.verbosity:
             print("-"*30)
+            if ai_decision.get("scratchpad"):
+                print(f"Scratchpad: {ai_decision.get("scratchpad")}")
             print(f"{(self.model).split("/")[-1]} Decision: {ai_decision}")
-            print("-"*30)
 
         # Send reasoning as a message to the battle room
         if ai_decision.get("reasoning"):
@@ -215,4 +226,8 @@ class AIPlayer(Player):
 
             # Clean up stored interactions for this battle
             del self.battle_interactions[battle.battle_tag]
+
+        # Clean up scratchpad for this battle
+        if battle.battle_tag in self.battle_scratchpads:
+            del self.battle_scratchpads[battle.battle_tag]
 
