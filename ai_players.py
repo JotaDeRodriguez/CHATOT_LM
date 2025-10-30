@@ -122,9 +122,25 @@ class AIPlayer(Player):
         battle_message = self.write_prompt(battle=battle)
         ai_decision = await self.ask_ai_model(battle_message)
 
-        # Store scratchpad if provided
+        # Ensure ai_decision is a dict
+        if not isinstance(ai_decision, dict):
+            if self.verbosity:
+                print(Fore.RED + f"AI returned invalid type: {type(ai_decision)}. Value: {ai_decision}")
+            ai_decision = {"reasoning": "Invalid response type", "action": None}
+
+        # Append scratchpad if provided
         if ai_decision.get("scratchpad"):
-            self.battle_scratchpads[battle.battle_tag] = ai_decision["scratchpad"]
+            # Convert scratchpad to string if it's a dict
+            scratchpad_str = ai_decision["scratchpad"]
+            if isinstance(scratchpad_str, dict):
+                scratchpad_str = json.dumps(scratchpad_str, indent=2)
+            elif not isinstance(scratchpad_str, str):
+                scratchpad_str = str(scratchpad_str)
+
+            if battle.battle_tag in self.battle_scratchpads:
+                self.battle_scratchpads[battle.battle_tag] += "\n\n" + scratchpad_str
+            else:
+                self.battle_scratchpads[battle.battle_tag] = scratchpad_str
 
         # Store interaction to log when battle finishes
         if battle.battle_tag not in self.battle_interactions:
@@ -142,9 +158,12 @@ class AIPlayer(Player):
         # TODO Replace for proper logging
         if self.verbosity:
             print("-"*30)
+            print(f"{(self.model).split("/")[-1]}:")
             if ai_decision.get("scratchpad"):
                 print(f"Scratchpad: {ai_decision.get("scratchpad")}")
-            print(f"{(self.model).split("/")[-1]} Decision: {ai_decision}")
+            print(f"Decision: {ai_decision.get("reasoning")}")
+            print(f"Action: {ai_decision.get("action")}")
+
 
         # Send reasoning as a message to the battle room
         if ai_decision.get("reasoning"):
@@ -194,10 +213,16 @@ class AIPlayer(Player):
                 response = await router_choose_action(battle_message, self.model)
                 try:
                     decision = json.loads(response)
+                    # Ensure decision is a dict
+                    if not isinstance(decision, dict):
+                        if self.verbosity:
+                            print(Fore.RED + f"AI response parsed but not a dict: {type(decision)} = {decision}")
+                        return {"reasoning": "Response not a dict", "action": None}
                     return decision
                 except json.JSONDecodeError as e:
                     if self.verbosity:
                         print(Fore.RED + f"Failed to parse AI response as JSON: {str(e)}")
+                        print(Fore.RED + f"Response was: {response[:200]}")
                     return {"reasoning": "Failed to parse response", "action": None}
 
             else:

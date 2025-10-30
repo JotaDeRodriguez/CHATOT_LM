@@ -13,3 +13,4 @@ wheels/
 
 .claude/*
 battle_logs/*
+battle_logs_pre_scratchpad/*
