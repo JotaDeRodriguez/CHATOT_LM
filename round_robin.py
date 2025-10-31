@@ -30,38 +30,17 @@ MODEL_CONFIGS = [
         "verbosity": True
     },
     {
-        "type": "router",
-        "model": "deepseek/deepseek-v3.2-exp",
-        "username": "deepseek_v3",
-        "verbosity": True
+        "type": "simple",
+        "username": "simple_player"
     },
+
     {
-        "type": "router",
-        "model": "deepseek/deepseek-r1",
-        "username": "deepseek_r1",
-        "verbosity": True
-    },
-    {
-        "type": "router",
-        "model": "z-ai/glm-4.6:exacto",
-        "username": "GLM_46",
-        "verbosity": True
-    },
-    {
-        "type": "router",
-        "model": "qwen/qwen-plus-2025-07-28:thinking",
-        "username": "qwen_plus",
-        "verbosity": True
-    },
-    {
-        "type": "router",
-        "model": "meta-llama/llama-4-maverick",
-        "username": "llama_maverick",
-        "verbosity": True
+        "type": "simple",
+        "username": "simpleplayerbis"
     },
     {
         "type": "simple",
-        "username": "simple_player"
+        "username": "simpleplayerbiss"
     },
     # {
     #     "type": "max",

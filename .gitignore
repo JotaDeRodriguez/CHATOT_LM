@@ -10,7 +10,7 @@ wheels/
 .venv
 
 .env
+TO_DELETE/*
 
 .claude/*
-battle_logs/*
 battle_logs_pre_scratchpad/*
