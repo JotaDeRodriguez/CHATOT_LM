@@ -5,7 +5,8 @@ from ollama_chat import local_choose_action
 from open_router_chat import router_choose_action
 from poke_env.battle import Battle
 from colorama import init, Fore
-from utils import create_observation_dictionary, create_team_dictionary, load_yaml, log_battle_interaction
+from utils import (create_observation_dictionary, create_team_array, create_action_context,
+                   encode_to_toon, load_yaml, log_battle_interaction)
 
 init(autoreset=True)
 
@@ -70,23 +71,24 @@ class AIPlayer(Player):
         # Build the prompt
         prompt_parts = []
 
-        # Add battle log
+        # Add battle log (plain text - already optimal)
         prompt_parts.append("Battle Log (Recent Events):")
         for msg in recent_messages:
             prompt_parts.append(f"  {msg}")
 
+        # Use TOON encoding for structured data to save tokens
         observations = create_observation_dictionary(battle)
-        prompt_parts.append(f"Observations:\n{json.dumps(observations, indent=2)}")
+        prompt_parts.append("Observations:")
+        prompt_parts.append(encode_to_toon(observations))
 
-        team_info = create_team_dictionary(battle)
-        prompt_parts.append(f"Team Status:\n{json.dumps(team_info, indent=2)}")
+        team_info = create_team_array(battle)
+        prompt_parts.append("Team Status:")
+        prompt_parts.append(encode_to_toon(team_info))
 
-        # Add available actions
-        available_actions = {
-            "moves": [move.id for move in battle.available_moves],
-            "switches": [pokemon.species for pokemon in battle.available_switches]
-        }
-        prompt_parts.append(f"Available Actions:\n{json.dumps(available_actions, indent=2)}")
+        # Add available actions (simplified - no duplication of moves already in team/observations)
+        available_actions = create_action_context(battle)
+        prompt_parts.append("Available Actions:")
+        prompt_parts.append(encode_to_toon(available_actions))
 
         # Add scratchpad from previous turn if it exists
         if battle_tag in self.battle_scratchpads:
@@ -158,6 +160,7 @@ class AIPlayer(Player):
         # TODO Replace for proper logging
         if self.verbosity:
             print("-"*30)
+            print(f"Full prompt: {battle_message}\n")
             print(f"{(self.model).split("/")[-1]}:")
             if ai_decision.get("scratchpad"):
                 print(f"Scratchpad: {ai_decision.get("scratchpad")}")

@@ -3,41 +3,34 @@ import random
 from ai_players import AIPlayer
 from poke_env import AccountConfiguration
 from poke_env.player import RandomPlayer, SimpleHeuristicsPlayer, MaxBasePowerPlayer
-from teams import *
+from random_team_builder import RandomTeamBuilder
 
-# Randomly assign teams to players
-all_teams = [team_1, team_2, team_3, team_4, team_5, team_6, team_7]
-random.shuffle(all_teams)
+# Tournament configuration variables
+BUILDS_FILE = "pokemon_builds.txt"
+FILTER_FORMAT = "doubles"
+INCLUDE_FORMATS=["OU", "UBER"]
+TEAM_SIZE = 4
+BATTLE_FORMAT = "gen3ubers"
 
-# Assign teams sequentially from shuffled list
+team_builder = RandomTeamBuilder(
+        builds_file=BUILDS_FILE,
+        filter_format=FILTER_FORMAT,
+        include_formats=INCLUDE_FORMATS
+    )
+
+# Generate teams for each player
 team_assignments = {
-    'gemma': all_teams[0] if len(all_teams) > 0 else team_1,
-    'qwen': all_teams[1] if len(all_teams) > 1 else team_2,
-    'gemini': all_teams[2] if len(all_teams) > 2 else team_3,
-    'gpt5': all_teams[3] if len(all_teams) > 3 else team_4,
-    'gpt_oss': all_teams[4] if len(all_teams) > 4 else team_5,
-    'qwen_32b': all_teams[5] if len(all_teams) > 5 else team_6,
-    'grok': all_teams[6] if len(all_teams) > 6 else team_7,
-    'random': random.choice(all_teams),
-    'simple': random.choice(all_teams),
-    'max': random.choice(all_teams),
+    'gemma': team_builder.generate_random_team(TEAM_SIZE),
+    'qwen': team_builder.generate_random_team(TEAM_SIZE),
+    'gemini': team_builder.generate_random_team(TEAM_SIZE),
+    'gpt5': team_builder.generate_random_team(TEAM_SIZE),
+    'gpt_oss': team_builder.generate_random_team(TEAM_SIZE),
+    'qwen_32b': team_builder.generate_random_team(TEAM_SIZE),
+    'grok': team_builder.generate_random_team(TEAM_SIZE),
+    'random': team_builder.generate_random_team(TEAM_SIZE),
+    'simple': team_builder.generate_random_team(TEAM_SIZE),
+    'max': team_builder.generate_random_team(TEAM_SIZE),
 }
-
-print("Team Assignments:")
-for player, team in team_assignments.items():
-    # More robust team name extraction
-    try:
-        # Try splitting by actual newline character
-        lines = team.split('\n')
-        if len(lines) > 1:
-            team_name = lines[1].split('@')[0].strip()
-        else:
-            # Fallback: just show first few characters
-            team_name = team[:30].replace('\n', ' ')
-        print(f"{player}: {team_name}'s team")
-    except (IndexError, AttributeError):
-        print(f"{player}: Team assigned")
-print()
 
 ### LOCAL AI ###
 
@@ -104,7 +97,7 @@ max_player = MaxBasePowerPlayer(account_configuration=AccountConfiguration("max_
 
 async def main():
     # await gemma_player.accept_challenges(opponent=None, n_challenges=1)
-    await gemma_player.battle_against(simple_player, n_battles=1)
+    await grok_4_player.battle_against(gemma_player, n_battles=1)
 
 if __name__ == "__main__":
     asyncio.run(main())

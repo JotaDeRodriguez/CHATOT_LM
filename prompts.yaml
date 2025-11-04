@@ -64,71 +64,7 @@ agent:
     On turn 6, Player 1 switched in Claydol at full health, and Player 2 responded with Earthquake from Swampert targeting Claydol
     
     Observations:
-    
-    {
-      "weather": "Rain",
-      "fields": ["Spikes"],
-      "side_conditions": {"Reflect": 3},
-      "opponent_side_conditions": {},
-      "turn": 5,
-      "active_pokemon": {
-        "species": "Mewtwo",
-        "level": 100,
-        "ability": "Pressure",
-        "item": "Leftovers",
-        "current_hp_fraction": "80%",
-        "status": null,
-        "boosts": {"spatk": 1},
-        "moves": ["calm-mind", "psychic", "ice-beam", "recover"],
-        "effects": ["Reflect"],
-        "stats": {"hp": 106, "atk": 110, "def": 90, "spatk": 154, "spdef": 90, "speed": 130}
-      },
-      "opponent_active_pokemon": {
-        "species": "Kyogre",
-        "level": 100,
-        "ability": "Drizzle",
-        "item": "Choice Scarf",
-        "current_hp_fraction": "70%",
-        "status": null,
-        "boosts": {},
-        "moves": ["thunder", "surf", "ice-beam", "calm-mind"],
-        "effects": [],
-        "stats": {"hp": 100, "atk": 100, "def": 90, "spatk": 150, "spdef": 140, "speed": 90}
-      }
-    }
-    
-    Team Status:
-    
-    {
-      "player_team": {
-        "Mewtwo": {
-          "level": 100,
-          "ability": "Pressure",
-          "item": "Leftovers",
-          "current_hp_fraction": "80%",
-          "status": null,
-          "stats": {"hp": 106, "atk": 110, "def": 90, "spatk": 154, "spdef": 90, "speed": 130},
-          "moves": {
-            "calm-mind": {"current_pp": 10, "max_pp": 10},
-            "psychic": {"current_pp": 10, "max_pp": 10},
-            "ice-beam": {"current_pp": 10, "max_pp": 10},
-            "recover": {"current_pp": 10, "max_pp": 10}
-          },
-          "effects": ["Reflect"],
-          "boosts": {"spatk": 1},
-          "is_active": true,
-          "fainted": false,
-          "types": ["Psychic"]
-        }
-      }
-    }
-    
-    Available Actions:
-    
-    {
-      "moves": ["calm-mind", "psychic", "ice-beam", "recover"],
-      "switches": ["Groudon", "Lugia", "Rayquaza"]
-    }
+    Observations made on the opposing team and the moves and pokemon revealed
     
     Response Format:
 
@@ -152,7 +88,7 @@ agent:
       * Setup opportunities and threats to watch for
       * Team matchup analysis and positioning goals
     - Write notes that will help you make better decisions in future turns.
-    - You can update, expand, or completely rewrite the scratchpad each turn.
+    - RULES: Be succinct with the scratchpad, avoid repeating yourself as it'll get appended every time you use it. Consider it like a notepad to maintain your strategy along the turns and 
 
     Strategy Reminder:
 
