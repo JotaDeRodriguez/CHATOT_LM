@@ -51,3 +51,6 @@ Excellent! Now I have a clear picture. Here's what you need to know about adapti
   Would you like me to implement the double battles functionality? If so, which approach would you prefer - modifying existing classes or creating separate ones?  
 
   - Write Readme
+
+
+  - Add check to scratchpad to ensure its not a json

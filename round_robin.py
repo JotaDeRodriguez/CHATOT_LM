@@ -8,44 +8,38 @@ MODEL_CONFIGS = [
     # {
     #     "type": "local",
     #     "model": "qwen3:14b",
-    #     "username": "qwen3_14b",
-    #     "verbosity": True
-    # },
-    # {
-    #     "type": "router",
-    #     "model": "openai/gpt-5-mini",
-    #     "username": "gpt_5",
+    #     "username": "qwen314b",
     #     "verbosity": True
     # },
     {
         "type": "router",
         "model": "google/gemini-2.5-flash",
-        "username": "Gemini_Flash",
+        "username": "GeminiFlash",
         "verbosity": True
     },
     {
         "type": "router",
         "model": "x-ai/grok-4-fast",
-        "username": "grok4_fast",
+        "username": "grok4fast",
         "verbosity": True
     },
     {
         "type": "simple",
-        "username": "simple_player"
+        "username": "simpleplayer"
     },
 
     {
         "type": "simple",
-        "username": "simpleplayerbis"
+        "username": "simpleplayer2"
     },
     {
         "type": "simple",
-        "username": "simpleplayerbiss"
+        "username": "simpleplayer3"
     },
-    # {
-    #     "type": "max",
-    #     "username": "max_damage_player"
-    # }
+    {
+        "type": "max",
+        "username": "maxdamageplayer"
+    }
 ]
 
 # Tournament configuration variables

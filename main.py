@@ -97,7 +97,7 @@ max_player = MaxBasePowerPlayer(account_configuration=AccountConfiguration("max_
 
 async def main():
     # await gemma_player.accept_challenges(opponent=None, n_challenges=1)
-    await grok_4_player.battle_against(gemma_player, n_battles=1)
+    await grok_4_player.battle_against(gpt_5_player, n_battles=1)
 
 if __name__ == "__main__":
     asyncio.run(main())

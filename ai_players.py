@@ -11,7 +11,7 @@ from utils import (create_observation_dictionary, create_team_array, create_acti
 init(autoreset=True)
 
 class AIPlayer(Player):
-    def __init__ (self, model, provider, verbosity=False, account_configuration=None, team=None, battle_format=None, log_length=25, max_concurrent_battles=0, max_turns=25):
+    def __init__ (self, model, provider, verbosity=False, account_configuration=None, team=None, battle_format=None, log_length=15, max_concurrent_battles=0, max_turns=25):
         super().__init__(account_configuration=account_configuration, team=team, battle_format=battle_format, max_concurrent_battles=max_concurrent_battles)
         self.model = model
         self._provider = provider  # 'local' or 'router'
@@ -24,7 +24,7 @@ class AIPlayer(Player):
         self.battle_scratchpads = {}
 
     @classmethod
-    def local(cls, model, verbosity=False, account_configuration=None, team=None, battle_format=None, log_length=None, max_concurrent_battles=0, max_turns=25):
+    def local(cls, model, verbosity=False, account_configuration=None, team=None, battle_format=None, log_length=10, max_concurrent_battles=0, max_turns=25):
         """Create an AIPlayer that uses local Ollama models"""
         return cls(
             model=model,
@@ -159,8 +159,8 @@ class AIPlayer(Player):
 
         # TODO Replace for proper logging
         if self.verbosity:
-            print("-"*30)
-            print(f"Full prompt: {battle_message}\n")
+            # print("-"*30)
+            # print(f"Full prompt: {battle_message}\n")
             print(f"{(self.model).split("/")[-1]}:")
             if ai_decision.get("scratchpad"):
                 print(f"Scratchpad: {ai_decision.get("scratchpad")}")

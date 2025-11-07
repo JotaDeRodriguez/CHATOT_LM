@@ -88,8 +88,10 @@ agent:
       * Setup opportunities and threats to watch for
       * Team matchup analysis and positioning goals
     - Write notes that will help you make better decisions in future turns.
-    - RULES: Be succinct with the scratchpad, avoid repeating yourself as it'll get appended every time you use it. Consider it like a notepad to maintain your strategy along the turns and 
-
+    - RULES: 
+      - Be succinct with the scratchpad, avoid repeating yourself as it'll get appended every time you use it. Consider it like a notepad to maintain your strategy along the turns and 
+      - Use strings, the scratchpad is not a JSON
+      
     Strategy Reminder:
 
     Consider type matchups, status conditions, and boosts.
